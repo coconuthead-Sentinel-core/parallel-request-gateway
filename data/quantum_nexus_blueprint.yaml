@@ -1,13 +1,13 @@
 # data/quantum_nexus_blueprint.yaml
 # Quantum Nexus Rolodex Redesign Blueprint
 # Version 1.8.1 | December 19, 2025
-# Architect: Shannon Bryan Kelly
+# Architect: Shannon Brian Kelley
 
 quantum_nexus_blueprint:
   id: "QuantumNexus-RolodexRedesign-2025"
   version: "1.8.1"
   date: "2025-12-19"
-  architect: "Shannon Bryan Kelly"
+  architect: "Shannon Brian Kelley"
 
   filing_system:
     origin: "A1"

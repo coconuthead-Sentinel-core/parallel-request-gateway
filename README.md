@@ -163,8 +163,8 @@ Sovereign Forge/
 
 ## License
 
-MIT License — Copyright (c) 2025 Shannon Bryan Kelly
+MIT License — Copyright (c) 2025 Shannon Brian Kelley
 
 ## Acknowledgments
 
-Built by Shannon Bryan Kelly in collaboration with Claude AI.
+Built by Shannon Brian Kelley in collaboration with Claude AI.

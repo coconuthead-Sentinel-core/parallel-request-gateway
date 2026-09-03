@@ -70,7 +70,7 @@ Together the three demonstrate the **same architectural instincts at three integ
 
 ## Author
 
-**Shannon Brian Kelly** — Healthcare CNA → AI Systems Developer career transition.
+**Shannon Brian Kelley** — Healthcare CNA → AI Systems Developer career transition.
 Built in collaboration with Claude AI (Anthropic).
 
 ## License
