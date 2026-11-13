@@ -25,8 +25,14 @@ class QuantumNexus:
 
     def __init__(self, blueprint: Dict[str, Any]):
         self.bp = blueprint
-        self._rc_map = (blueprint.get("great_greg_coordinates", {}) or {}).get("rc_map", {}) or {}
-        self._deps = {d["id"]: d for d in (blueprint.get("dependencies") or []) if isinstance(d, dict) and "id" in d}
+        self._rc_map = (blueprint.get("great_greg_coordinates", {}) or {}).get(
+            "rc_map", {}
+        ) or {}
+        self._deps = {
+            d["id"]: d
+            for d in (blueprint.get("dependencies") or [])
+            if isinstance(d, dict) and "id" in d
+        }
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "QuantumNexus":
@@ -73,8 +79,11 @@ class QuantumNexus:
         if not info:
             raise KeyError(f"Unknown cell: {original}")
         return GreatGreg(
-            cell=canonical, r=int(info["r"]), c=int(info["c"]),
-            node=int(info["node"]), label=str(info["label"]),
+            cell=canonical,
+            r=int(info["r"]),
+            c=int(info["c"]),
+            node=int(info["node"]),
+            label=str(info["label"]),
         )
 
     # ── Origin / Terminus shortcuts ───────────────────────────────────
@@ -99,20 +108,21 @@ class QuantumNexus:
         )
         cell, info = items[0]
         return GreatGreg(
-            cell=cell, r=int(info["r"]), c=int(info["c"]),
-            node=int(info["node"]), label=str(info["label"]),
+            cell=cell,
+            r=int(info["r"]),
+            c=int(info["c"]),
+            node=int(info["node"]),
+            label=str(info["label"]),
         )
 
     # ── Path tracing ─────────────────────────────────────────────────
-    def diagonal_trace(self, dep_id: str = "dep_A1_to_V1"
-                       ) -> List[GreatGreg]:
+    def diagonal_trace(self, dep_id: str = "dep_A1_to_V1") -> List[GreatGreg]:
         """Resolve a diagonal_dependency's `path` (list of cells) into GreatGregs."""
         dep = self.dependency(dep_id)
         path = dep.get("path", [])
         return [self.resolve_cell(c) for c in path]
 
-    def lateral_trace(self, dep_id: str = "dep_AllFiles_L2R_to_Z1"
-                      ) -> List[GreatGreg]:
+    def lateral_trace(self, dep_id: str = "dep_AllFiles_L2R_to_Z1") -> List[GreatGreg]:
         """Resolve a lateral_row_major_dependency's `path` (list of rows of cells)."""
         dep = self.dependency(dep_id)
         path = dep.get("path", [])
@@ -127,7 +137,7 @@ class QuantumNexus:
 
     # ── Node lookup ──────────────────────────────────────────────────
     def node(self, node_id: str) -> Dict[str, Any]:
-        for n in (self.bp.get("nodes") or []):
+        for n in self.bp.get("nodes") or []:
             if isinstance(n, dict) and n.get("id") == node_id:
                 return n
         raise KeyError(f"Node not found: {node_id}")
@@ -140,12 +150,12 @@ class QuantumNexus:
     def to_api_response(self, cell: str) -> Dict[str, Any]:
         gg = self.resolve_cell(cell)
         return {
-            "cell":    gg.cell,
-            "row":     gg.r,
-            "column":  gg.c,
-            "node":    gg.node,
+            "cell": gg.cell,
+            "row": gg.r,
+            "column": gg.c,
+            "node": gg.node,
             "node_id": f"Node_{gg.node}",
-            "label":   gg.label,
+            "label": gg.label,
         }
 
     def resolve(self, ref: str) -> GreatGreg:
@@ -172,8 +182,14 @@ class QuantumNexus:
 
             # scan rc_map for matching triplet
             for cell, info in self._rc_map.items():
-                if int(info["node"]) == node and int(info["r"]) == r and int(info["c"]) == c:
-                    return GreatGreg(cell=cell, r=r, c=c, node=node, label=str(info["label"]))
+                if (
+                    int(info["node"]) == node
+                    and int(info["r"]) == r
+                    and int(info["c"]) == c
+                ):
+                    return GreatGreg(
+                        cell=cell, r=r, c=c, node=node, label=str(info["label"])
+                    )
             raise KeyError(f"No cell found for {ref} (node={node}, r={r}, c={c})")
 
         # default: treat as cell

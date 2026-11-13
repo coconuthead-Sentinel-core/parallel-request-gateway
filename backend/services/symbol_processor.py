@@ -5,9 +5,10 @@ Preserves the older import path `backend.services.symbol_processor` for
 legacy test compatibility after the Symbol* rename. New code should import
 directly from `backend.services.glyph_processor`.
 """
+
 from .glyph_processor import (
-    SymbolPatternMatcher,
     SymbolicMetadata,
+    SymbolPatternMatcher,
     get_symbol_pattern_matcher,
 )
 

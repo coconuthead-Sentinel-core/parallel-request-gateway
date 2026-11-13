@@ -3,7 +3,11 @@ import json
 import logging
 from typing import Any
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect  # type: ignore[reportMissingImports]
+from fastapi import (  # type: ignore[reportMissingImports]
+    APIRouter,
+    WebSocket,
+    WebSocketDisconnect,
+)
 
 from .eventbus import bus
 from .security import websocket_require_api_key
@@ -33,6 +37,7 @@ class ConnectionManager:
             except:
                 pass
 
+
 manager = ConnectionManager()
 
 
@@ -45,15 +50,22 @@ async def ws_cognitive(websocket: WebSocket) -> Any:
     loop = asyncio.get_running_loop()
 
     # Subscribe to cognitive events (zone, symbolic, glyph)
-    cognitive_queue = bus.subscribe(loop, maxsize=100, policy="latest", topic="cognitive")
+    cognitive_queue = bus.subscribe(
+        loop, maxsize=100, policy="latest", topic="cognitive"
+    )
     symbolic_queue = bus.subscribe(loop, maxsize=100, policy="latest", topic="symbolic")
     glyph_queue = bus.subscribe(loop, maxsize=100, policy="latest", topic="glyph")
 
     try:
         # Send initial cognitive state
         from .services.memory_zones import get_memory_manager
+
         memory_manager = get_memory_manager()
-        zone_metrics = memory_manager.get_zone_metrics() if hasattr(memory_manager, 'get_zone_metrics') else {}
+        zone_metrics = (
+            memory_manager.get_zone_metrics()
+            if hasattr(memory_manager, "get_zone_metrics")
+            else {}
+        )
 
         initial_state = {
             "type": "cognitive.state",
@@ -61,7 +73,7 @@ async def ws_cognitive(websocket: WebSocket) -> Any:
                 "zone_metrics": zone_metrics,
                 "active_lens": "neurotypical",  # Default
                 "timestamp": __import__("time").time(),
-            }
+            },
         }
         await websocket.send_text(json.dumps(initial_state))
 
@@ -69,13 +81,14 @@ async def ws_cognitive(websocket: WebSocket) -> Any:
         while True:
             # Wait for any cognitive event
             import asyncio
+
             done, pending = await asyncio.wait(
                 [
                     asyncio.create_task(cognitive_queue.get()),
                     asyncio.create_task(symbolic_queue.get()),
                     asyncio.create_task(glyph_queue.get()),
                 ],
-                return_when=asyncio.FIRST_COMPLETED
+                return_when=asyncio.FIRST_COMPLETED,
             )
 
             # Cancel pending tasks

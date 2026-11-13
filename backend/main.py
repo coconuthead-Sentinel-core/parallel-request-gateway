@@ -1,22 +1,25 @@
-import os
+import asyncio
 import logging
+import os
 from contextlib import asynccontextmanager
+
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .api import router as api_router
-from .ws_api import router as ws_router
+
 from .adapters.azure_openai import AzureCognitiveTokenProvider
+from .api import router as api_router
 from .infrastructure.cosmos_repo import CosmosDBRepository
-import uvicorn
-import asyncio
+from .ws_api import router as ws_router
 
 # Set event loop policy for Windows
-if os.name == 'nt':
+if os.name == "nt":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 # Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("sovereign-forge")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -33,11 +36,12 @@ async def lifespan(app: FastAPI):
         logger.warning("AAD warmup failed: %s", exc)
     finally:
         await provider.aclose()
-    
+
     yield
-    
+
     # Cleanup on shutdown
     await CosmosDBRepository.close()
+
 
 app = FastAPI(
     title="Sovereign Forge — Multi-Platform Orchestration Gateway",
@@ -70,24 +74,14 @@ app.include_router(api_router, prefix="/api")
 # /ws/metrics, /ws/events resolve. Without this they 404'd silently.
 app.include_router(ws_router)
 
+
 @app.post("/api/testpost")
 async def test_post():
     return {"message": "ok"}
 
-if __name__ == "__main__":
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=9000,
-        timeout_keep_alive=75,
-        log_level="info"
-    )
 
 if __name__ == "__main__":
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=9000,
-        timeout_keep_alive=75,
-        log_level="info"
-    )
+    uvicorn.run(app, host="0.0.0.0", port=9000, timeout_keep_alive=75, log_level="info")
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=9000, timeout_keep_alive=75, log_level="info")

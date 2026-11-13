@@ -113,8 +113,7 @@ def merge(
         unified_text = f"[QuantumNexusForge] {qnf_text}"
     else:
         unified_text = (
-            f"[QuantumNexusForge]\n{qnf_text}\n\n"
-            f"[SentinelForge]\n{sentinel_text}"
+            f"[QuantumNexusForge]\n{qnf_text}\n\n" f"[SentinelForge]\n{sentinel_text}"
         )
 
     # --- Merge numeric metrics ----------------------------------------------

@@ -12,7 +12,7 @@ Architecture:
 
 import logging
 import re
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -76,16 +76,16 @@ class DyslexiaLens:
     def _identify_chunks(self, text: str) -> List[str]:
         """Identify logical chunks in the text."""
         # Split by paragraphs first
-        paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
+        paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
 
         chunks = []
         for para in paragraphs:
             # Further split long paragraphs into sentences
             if len(para) > 200:
-                sentences = re.split(r'(?<=[.!?])\s+', para)
+                sentences = re.split(r"(?<=[.!?])\s+", para)
                 # Group sentences into chunks of 2-3
                 for i in range(0, len(sentences), 2):
-                    chunk = ' '.join(sentences[i:i+2])
+                    chunk = " ".join(sentences[i : i + 2])
                     if chunk.strip():
                         chunks.append(chunk.strip())
             else:
@@ -126,7 +126,7 @@ class DyslexiaLens:
         if total > 1:
             nav_symbols.append("🔀")  # Connections
 
-        nav_string = ' '.join(nav_symbols)
+        nav_string = " ".join(nav_symbols)
         if nav_string:
             chunk = f"{chunk} [{nav_string}]"
 
@@ -136,7 +136,7 @@ class DyslexiaLens:
         """Create a spatial layout for the chunks."""
         if len(chunks) <= 3:
             # Simple vertical layout
-            return '\n\n'.join(chunks)
+            return "\n\n".join(chunks)
         else:
             # Create a grid-like layout with visual separation
             layout_lines = []
@@ -147,7 +147,7 @@ class DyslexiaLens:
                     # Indent alternating chunks for spatial variety
                     layout_lines.append(f"   ↳ {chunk}")
 
-            return '\n\n'.join(layout_lines)
+            return "\n\n".join(layout_lines)
 
     def _add_overview_map(self, text: str, num_chunks: int) -> str:
         """Add an overview map of the content structure."""
@@ -162,7 +162,7 @@ class DyslexiaLens:
         if num_chunks > 5:
             map_symbols.append("...")
 
-        map_str = ' → '.join(map_symbols)
+        map_str = " → ".join(map_symbols)
         overview = f"🗺️ **Content Map:** {map_str}\n\n{text}"
 
         return overview
@@ -180,6 +180,7 @@ class DyslexiaLens:
 
 
 # --- Convenience Functions ---
+
 
 def create_dyslexia_lens() -> DyslexiaLens:
     """Create and return a configured Dyslexia lens instance."""

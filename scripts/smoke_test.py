@@ -13,8 +13,8 @@ OPENAI_API_KEY is not set or the OpenAI SDK is missing.
 #    python scripts/smoke_test.py
 # ==============================================================================
 
-import sys
 import os
+import sys
 import time
 from pathlib import Path
 
@@ -22,6 +22,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from fastapi.testclient import TestClient
+
 from backend.main import app
 
 
@@ -36,9 +37,9 @@ def print_test(name, status, message=""):
 def run_smoke_test():
     print("🚀 INITIATING SMOKE TEST SEQUENCE...")
     print("=" * 40)
-    
+
     client = TestClient(app)
-    
+
     # 1. Check API Connectivity
     print("[1/3] Pinging System Core...", end=" ")
     try:
@@ -94,6 +95,7 @@ def run_smoke_test():
     print("=" * 40)
     print("🏁 SMOKE TEST COMPLETE")
     return True
+
 
 if __name__ == "__main__":
     run_smoke_test()

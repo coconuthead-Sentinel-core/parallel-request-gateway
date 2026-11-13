@@ -9,7 +9,7 @@ Architecture:
 """
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -21,17 +21,14 @@ SYMBOL_MAP = {
     "\U0001f310": "meta_context",
     "\U0001f52d": "observation_mode",
     "\U0001f300": "cognitive_flow",
-
     # Action pulse symbols
     "\U0001f702": "action_pulse",
     "\u2699\ufe0f": "processing_gear",
     "\U0001f53a": "initiation_triangle",
-
     # Memory zone symbols
     "\U0001f7e2": "active_zone",
     "\U0001f7e1": "pattern_zone",
     "\U0001f534": "archived_zone",
-
     # Cognitive lens symbols
     "\U0001f9e0": "neurotypical_mode",
     "\u26a1": "adhd_burst",
@@ -68,7 +65,7 @@ def parse_symbol_sequence(sequence: str) -> Dict[str, Any]:
         "symbols": parsed_symbols,
         "concepts": concepts,
         "sequence_length": len(sequence),
-        "parsed_count": len(parsed_symbols)
+        "parsed_count": len(parsed_symbols),
     }
 
 
