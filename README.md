@@ -1,6 +1,6 @@
 # Sovereign Forge — Multi-Platform Orchestration Gateway
 
-**Unified cognitive AI gateway for the Forge Trilogy** | 2025
+| 2025
 
 ## Overview
 
@@ -163,8 +163,8 @@ Sovereign Forge/
 
 ## License
 
-MIT License — Copyright (c) 2025 Shannon Bryan Kelly
+MIT License — Copyright (c) 2025 Shannon Brian Kelley
 
 ## Acknowledgments
 
-Built by Shannon Bryan Kelly in collaboration with Claude AI.
+Built by Shannon Brian Kelley in collaboration with Claude AI.
