@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Depends, Body, Response, status, R
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
-# import json
+import json
 # import httpx
 
 from .schemas import (
@@ -24,7 +24,7 @@ from .core.security import api_key_guard
 # from .adapters.azure_openai import AzureOpenAIAdapter, AzureCognitiveTokenProvider, AIO_TIMEOUT
 from .mock_adapter import MockOpenAIAdapter
 from .core.config import settings
-# from .eventbus import bus
+from .eventbus import bus
 
 # NEW: Import Domain, Infrastructure, and Services
 from .domain.models import Note
