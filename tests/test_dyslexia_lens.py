@@ -7,14 +7,15 @@ Validates:
 4. Integration with CognitiveOrchestrator
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from backend.services.dyslexia_lens import DyslexiaLens
-from backend.domain.models import CognitiveLens
+import pytest
 
+from backend.domain.models import CognitiveLens
+from backend.services.dyslexia_lens import DyslexiaLens
 
 # --- Dyslexia Lens Unit Tests ---
+
 
 class TestDyslexiaLensInitialization:
     """Test Dyslexia lens initialization."""
@@ -205,7 +206,7 @@ class TestDyslexiaLensIntegration:
         Hands-on practice reinforces understanding.
         """
         result = lens.transform_context(text.strip())
-        
+
         # Should produce visually structured output
         assert len(result) > 0
 
@@ -250,7 +251,7 @@ class TestDyslexiaLensReset:
         lens = DyslexiaLens()
         # Process some content to change indices
         lens.transform_context("Test content.\n\nMore content.")
-        
+
         # Create new lens to reset
         new_lens = DyslexiaLens()
         assert new_lens.anchor_index == 0

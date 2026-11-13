@@ -22,8 +22,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
-from backend.eventbus import bus
 from backend.domain.models import SymbolicMetadata
+from backend.eventbus import bus
 
 logger = logging.getLogger(__name__)
 
@@ -33,35 +33,40 @@ SYMBOL_ROUTING_MAP: Dict[str, Dict[str, Any]] = {
         "cell": "A1",
         "node": 1,
         "topic": "glyph.initiation",
-        "r": 1, "c": 1,
+        "r": 1,
+        "c": 1,
         "label": "Initiation Point (Prime Truth)",
     },
     "CORE": {
         "cell": "H1",
         "node": 2,
         "topic": "glyph.process",
-        "r": 2, "c": 2,
+        "r": 2,
+        "c": 2,
         "label": "Processing Core (Diagonal Node 2)",
     },
     "EMIT": {
         "cell": "O1",
         "node": 3,
         "topic": "glyph.action",
-        "r": 3, "c": 3,
+        "r": 3,
+        "c": 3,
         "label": "Action Emitter (Diagonal Node 3)",
     },
     "ROOT": {
         "cell": "V1",
         "node": 4,
         "topic": "glyph.ethics",
-        "r": 4, "c": 4,
+        "r": 4,
+        "c": 4,
         "label": "Ethics Root (Meta Research focal)",
     },
     "CUBE": {
         "cell": "Z1",
         "node": 5,
         "topic": "glyph.stability",
-        "r": 5, "c": 2,
+        "r": 5,
+        "c": 2,
         "label": "Stability Terminus (Career)",
     },
 }
@@ -76,7 +81,7 @@ class _AliasMetrics(dict):
     """
 
     _ALIAS = {
-        "glyphs_mapped":   "symbols_mapped",
+        "glyphs_mapped": "symbols_mapped",
         "unmapped_glyphs": "unmapped_symbols",
     }
 
@@ -107,17 +112,27 @@ class SymbolEvent:
     node: int = 0
     topic: str = ""
     confidence: float = 0.0
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
     matched_seeds: List[str] = field(default_factory=list)
     applied_rules: Dict[str, str] = field(default_factory=dict)
     source_text_hash: Optional[str] = None
 
-    def __init__(self, *, symbol: str = "", glyph: str = "", cell: str = "",
-                 node: int = 0, topic: str = "", confidence: float = 0.0,
-                 timestamp: Optional[str] = None,
-                 matched_seeds: Optional[List[str]] = None,
-                 applied_rules: Optional[Dict[str, str]] = None,
-                 source_text_hash: Optional[str] = None):
+    def __init__(
+        self,
+        *,
+        symbol: str = "",
+        glyph: str = "",
+        cell: str = "",
+        node: int = 0,
+        topic: str = "",
+        confidence: float = 0.0,
+        timestamp: Optional[str] = None,
+        matched_seeds: Optional[List[str]] = None,
+        applied_rules: Optional[Dict[str, str]] = None,
+        source_text_hash: Optional[str] = None,
+    ):
         # Accept either ``symbol=`` or ``glyph=``; the latter wins if both
         # are provided so legacy tests can keep using ``glyph=``.
         self.symbol = glyph or symbol
@@ -138,7 +153,7 @@ class SymbolEvent:
     def to_dict(self) -> Dict[str, Any]:
         return {
             "symbol": self.symbol,
-            "glyph": self.symbol,        # back-compat alias
+            "glyph": self.symbol,  # back-compat alias
             "cell": self.cell,
             "node": self.node,
             "topic": self.topic,
@@ -172,18 +187,18 @@ class SymbolEventRouter:
         # Use a self-aliasing dict so legacy keys (`glyphs_mapped`,
         # `unmapped_glyphs`) read the same counters as the canonical
         # (`symbols_mapped`, `unmapped_symbols`) keys.
-        self._metrics = _AliasMetrics({
-            "events_emitted": 0,
-            "symbols_mapped": 0,
-            "unmapped_symbols": 0,
-            "topics_used": set(),
-        })
+        self._metrics = _AliasMetrics(
+            {
+                "events_emitted": 0,
+                "symbols_mapped": 0,
+                "unmapped_symbols": 0,
+                "topics_used": set(),
+            }
+        )
         logger.info("SymbolEventRouter initialized")
 
     def emit_from_metadata(
-        self,
-        metadata: SymbolicMetadata,
-        source_text_hash: Optional[str] = None
+        self, metadata: SymbolicMetadata, source_text_hash: Optional[str] = None
     ) -> List[SymbolEvent]:
         """
         Emit events for all matched symbols in metadata.
@@ -314,13 +329,13 @@ class SymbolEventRouter:
         keys are emitted so back-compat consumers keep working.
         """
         return {
-            "events_emitted":   self._metrics["events_emitted"],
-            "symbols_mapped":   self._metrics["symbols_mapped"],
-            "glyphs_mapped":    self._metrics["symbols_mapped"],   # alias
+            "events_emitted": self._metrics["events_emitted"],
+            "symbols_mapped": self._metrics["symbols_mapped"],
+            "glyphs_mapped": self._metrics["symbols_mapped"],  # alias
             "unmapped_symbols": self._metrics["unmapped_symbols"],
-            "unmapped_glyphs":  self._metrics["unmapped_symbols"], # alias
-            "topics_used":      list(self._metrics["topics_used"]),
-            "bus_status":       self._bus.status(),
+            "unmapped_glyphs": self._metrics["unmapped_symbols"],  # alias
+            "topics_used": list(self._metrics["topics_used"]),
+            "bus_status": self._bus.status(),
         }
 
 

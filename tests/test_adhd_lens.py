@@ -7,19 +7,20 @@ Validates:
 4. Edge cases and error handling
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
+
+from backend.domain.models import CognitiveLens
 from backend.services.adhd_lens import (
     ADHDLens,
     create_adhd_lens,
     transform_with_adhd_lens,
 )
 from backend.services.cognitive_orchestrator import CognitiveOrchestrator
-from backend.domain.models import CognitiveLens
-
 
 # --- ADHD Lens Unit Tests ---
+
 
 def test_adhd_lens_initialization():
     """Test ADHD lens initializes with correct defaults."""
@@ -136,6 +137,7 @@ def test_adhd_lens_config():
 
 # --- Convenience Function Tests ---
 
+
 def test_create_adhd_lens():
     """Test convenience function for creating lens."""
     lens = create_adhd_lens()
@@ -153,23 +155,29 @@ def test_transform_with_adhd_lens():
 
 # --- Integration Tests ---
 
+
 @pytest.mark.asyncio
 async def test_adhd_lens_integration():
     """Test ADHD lens integration with CognitiveOrchestrator."""
     # Mock AI adapter
     mock_adapter = MagicMock()
-    mock_adapter.chat = AsyncMock(return_value={
-        "id": "test-123",
-        "choices": [{"message": {"content": "This is a test response from the AI."}}]
-    })
+    mock_adapter.chat = AsyncMock(
+        return_value={
+            "id": "test-123",
+            "choices": [
+                {"message": {"content": "This is a test response from the AI."}}
+            ],
+        }
+    )
 
     # Create orchestrator with ADHD lens
-    orchestrator = CognitiveOrchestrator(mock_adapter, default_lens=CognitiveLens.ADHD_BURST)
+    orchestrator = CognitiveOrchestrator(
+        mock_adapter, default_lens=CognitiveLens.ADHD_BURST
+    )
 
     # Process message
     result = await orchestrator.process_message(
-        "Please explain how this works.",
-        lens=CognitiveLens.ADHD_BURST
+        "Please explain how this works.", lens=CognitiveLens.ADHD_BURST
     )
 
     # Verify response structure
@@ -196,6 +204,7 @@ def test_adhd_lens_orchestrator_metadata():
 
 
 # --- Edge Case Tests ---
+
 
 def test_adhd_lens_very_long_sentence():
     """Test handling of very long sentences."""

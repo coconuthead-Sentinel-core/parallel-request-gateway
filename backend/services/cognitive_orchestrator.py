@@ -15,32 +15,19 @@ Architecture:
 from __future__ import annotations
 
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
-from backend.services.chat_service import ChatService
 from backend.domain.models import (
-    Note,
-    ZonedNote,
-    MemoryZone,
     CognitiveLens,
-    ZoneMetrics,
+    MemoryZone,
+    Note,
     SymbolicMetadata,
     SymbolMatch,
+    ZonedNote,
+    ZoneMetrics,
 )
-from backend.services.memory_zones import (
-    ThreeZoneMemory,
-    calculate_entropy,
-    classify_zone,
-    get_memory_manager,
-)
-from backend.services.glyph_processor import (
-    SymbolPatternMatcher,
-    get_symbol_pattern_matcher,
-)
-from backend.services.glyph_parser import (
-    parse_symbol_sequence,
-    get_concept_for_symbol,
-)
+from backend.eventbus import bus
+from backend.infrastructure.cosmos_repo import cosmos_repo
 from backend.services.adhd_lens import (
     ADHDLens,
     create_adhd_lens,
@@ -49,12 +36,25 @@ from backend.services.autism_lens import (
     AutismLens,
     create_autism_lens,
 )
+from backend.services.chat_service import ChatService
 from backend.services.dyslexia_lens import (
     DyslexiaLens,
     create_dyslexia_lens,
 )
-from backend.infrastructure.cosmos_repo import cosmos_repo
-from backend.eventbus import bus
+from backend.services.glyph_parser import (
+    get_concept_for_symbol,
+    parse_symbol_sequence,
+)
+from backend.services.glyph_processor import (
+    SymbolPatternMatcher,
+    get_symbol_pattern_matcher,
+)
+from backend.services.memory_zones import (
+    ThreeZoneMemory,
+    calculate_entropy,
+    classify_zone,
+    get_memory_manager,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -65,20 +65,21 @@ CognitiveZone = MemoryZone  # Alias
 
 # --- Main Orchestrator ---
 
+
 class CognitiveOrchestrator(ChatService):
     """
     Enhanced middle layer orchestrating the Cognitive Pipeline:
-    
+
     1. Input Analysis (entropy calculation)
     2. Zone Classification (active/pattern/crystal)
     3. Context Retrieval (zone-aware memory)
     4. AI Processing (lens-adjusted generation)
     5. Memory Consolidation (zone-tagged storage)
     6. Event Publishing (real-time updates)
-    
+
     Inherits all ChatService behavior - safe extension.
     """
-    
+
     def __init__(
         self,
         ai_adapter,
@@ -103,7 +104,9 @@ class CognitiveOrchestrator(ChatService):
         self.autism_lens = create_autism_lens()
         self.dyslexia_lens = create_dyslexia_lens()
         self._zone_counts = {zone: 0 for zone in CognitiveZone}
-        logger.info(f"CognitiveOrchestrator initialized with lens: {default_lens.value}")
+        logger.info(
+            f"CognitiveOrchestrator initialized with lens: {default_lens.value}"
+        )
 
     async def process_message(
         self,
@@ -113,50 +116,54 @@ class CognitiveOrchestrator(ChatService):
     ) -> Dict[str, Any]:
         """
         Process a user message through the enhanced Cognitive Pipeline.
-        
+
         Extends ChatService.process_message with:
         - Entropy-based zone classification
         - Symbolic pattern recognition
         - Lens-adjusted processing
         - Zone transition events
-        
+
         Args:
             user_message: The user's input text
             context: Optional system context
             lens: Cognitive lens to apply (defaults to self.default_lens)
-        
+
         Returns:
             Standard chat completion response with added zone metadata
         """
         active_lens = lens or self.default_lens
-        
+
         # 1. Calculate input entropy
         input_entropy = calculate_entropy(user_message)
         input_zone = classify_zone(input_entropy)
-        
+
         logger.debug(f"Input entropy: {input_entropy:.2f} -> Zone: {input_zone.value}")
 
         # 2. Process symbolic patterns
         symbolic_metadata = self.symbol_matcher.process_text(user_message)
 
-        logger.debug(f"Symbolic processing: {len(symbolic_metadata.matched_symbols)} matches, "
-                    f"confidence: {symbolic_metadata.processing_confidence:.2f}")
+        logger.debug(
+            f"Symbolic processing: {len(symbolic_metadata.matched_symbols)} matches, "
+            f"confidence: {symbolic_metadata.processing_confidence:.2f}"
+        )
 
         # 2.5. Parse symbol sequences in the message
         symbol_parse_result = parse_symbol_sequence(user_message)
 
-        logger.debug(f"Symbol parsing: {symbol_parse_result['parsed_count']} symbols parsed")
-        
+        logger.debug(
+            f"Symbol parsing: {symbol_parse_result['parsed_count']} symbols parsed"
+        )
+
         # 3. Apply lens transformation to context (placeholder for future enhancement)
         adjusted_context = self._apply_lens(context, active_lens)
-        
+
         # 4. Call parent's AI processing (preserves existing behavior)
         try:
             response = await super().process_message(user_message, adjusted_context)
         except Exception as e:
             logger.error(f"AI processing failed: {e}")
             raise
-        
+
         # 5. Extract response text and calculate output entropy
         choices = response.get("choices", [])
         if choices:
@@ -167,10 +174,10 @@ class CognitiveOrchestrator(ChatService):
             ai_text = ""
             output_entropy = 0.0
             output_zone = CognitiveZone.ARCHIVED
-        
+
         # 6. Update zone counts
         self._zone_counts[output_zone] += 1
-        
+
         # 7. Publish zone event (for real-time dashboards)
         self._publish_zone_event(
             note_id=response.get("id", "unknown"),
@@ -178,7 +185,7 @@ class CognitiveOrchestrator(ChatService):
             output_zone=output_zone,
             entropy=output_entropy,
         )
-        
+
         # 8. Publish symbolic event if matches found
         if symbolic_metadata.matched_symbols:
             self._publish_symbolic_event(
@@ -207,13 +214,13 @@ class CognitiveOrchestrator(ChatService):
             "parsed_symbols": symbol_parse_result["parsed_count"],
             "symbol_concepts": symbol_parse_result["concepts"],
         }
-        
+
         return response
 
     def _apply_lens(self, context: str, lens: CognitiveLens) -> str:
         """
         Apply cognitive lens transformation to context.
-        
+
         Now implements ADHD Burst, Autism Precision, and Dyslexia Spatial lenses.
         """
         if lens == CognitiveLens.ADHD_BURST:
@@ -231,7 +238,7 @@ class CognitiveOrchestrator(ChatService):
             transformed = self.dyslexia_lens.transform_context(context)
             logger.debug("Applied Dyslexia Spatial lens transformation")
             return transformed
-        
+
         # Default: return context unchanged
         return context
 
@@ -251,7 +258,7 @@ class CognitiveOrchestrator(ChatService):
                 "output_zone": output_zone.value,
                 "entropy": round(entropy, 3),
                 "zone_counts": {k.value: v for k, v in self._zone_counts.items()},
-            }
+            },
         }
         try:
             bus.publish(event, topic="cognitive")
@@ -282,8 +289,10 @@ class CognitiveOrchestrator(ChatService):
                 ],
                 "dominant_topic": symbolic_metadata.dominant_topic,
                 "symbolic_tags": list(symbolic_metadata.symbolic_tags),
-                "processing_confidence": round(symbolic_metadata.processing_confidence, 3),
-            }
+                "processing_confidence": round(
+                    symbolic_metadata.processing_confidence, 3
+                ),
+            },
         }
         try:
             bus.publish(event, topic="symbolic")
@@ -307,7 +316,7 @@ class CognitiveOrchestrator(ChatService):
                 "concepts": symbol_data["concepts"],
                 "parsed_count": symbol_data["parsed_count"],
                 "sequence_length": symbol_data["sequence_length"],
-            }
+            },
         }
         try:
             bus.publish(event, topic="symbol")
@@ -332,14 +341,17 @@ class CognitiveOrchestrator(ChatService):
 
 # --- Factory Function (Optional convenience) ---
 
-def create_orchestrator(ai_adapter, lens: str = "neurotypical") -> CognitiveOrchestrator:
+
+def create_orchestrator(
+    ai_adapter, lens: str = "neurotypical"
+) -> CognitiveOrchestrator:
     """
     Factory function to create CognitiveOrchestrator with string lens name.
-    
+
     Args:
         ai_adapter: The AI adapter (Mock or Azure)
         lens: Lens name as string ("neurotypical", "adhd", "autism", "dyslexia")
-    
+
     Returns:
         Configured CognitiveOrchestrator instance
     """

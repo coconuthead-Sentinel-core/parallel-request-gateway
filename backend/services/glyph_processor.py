@@ -11,14 +11,14 @@ Architecture:
 import json
 import logging
 import re
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Set
 from dataclasses import asdict, dataclass, is_dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
 
 # Import from domain models to avoid circular imports
-from backend.domain.models import SymbolMatch, SymbolicMetadata
+from backend.domain.models import SymbolicMetadata, SymbolMatch
 
 
 def _to_dict(obj: Any) -> Dict[str, Any]:
@@ -64,9 +64,9 @@ class SymbolPatternMatcher:
     def _load_symbols(self) -> None:
         """Load symbol definitions from JSON file."""
         try:
-            with open(self.symbols_path, 'r', encoding='utf-8') as f:
+            with open(self.symbols_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                self.symbols = data.get('shapes', {})
+                self.symbols = data.get("shapes", {})
                 logger.info(f"Loaded {len(self.symbols)} symbol shapes")
         except FileNotFoundError:
             logger.warning(f"Symbols file not found: {self.symbols_path}")
@@ -83,28 +83,28 @@ class SymbolPatternMatcher:
             "APEX": {
                 "topic": "initiation",
                 "seeds": ["apex", "ignite", "ai_infer", "start", "init", "query"],
-                "rules": {"apex": "tag:initiation"}
+                "rules": {"apex": "tag:initiation"},
             },
             "CORE": {
                 "topic": "process",
                 "seeds": ["core", "resolve", "process", "logic", "reason"],
-                "rules": {"process": "tag:process.core"}
+                "rules": {"process": "tag:process.core"},
             },
             "EMIT": {
                 "topic": "action",
                 "seeds": ["emit", "launch", "trigger", "output", "send"],
-                "rules": {"launch": "tag:action.emit"}
+                "rules": {"launch": "tag:action.emit"},
             },
             "ROOT": {
                 "topic": "ethics",
                 "seeds": ["root", "link", "thread", "memory", "ethics", "bind"],
-                "rules": {"ethics": "tag:ethics.guard"}
+                "rules": {"ethics": "tag:ethics.guard"},
             },
             "CUBE": {
                 "topic": "stability",
                 "seeds": ["cube", "resonate", "stabilize", "harmonize", "ground"],
-                "rules": {"cube": "tag:stability.struct"}
-            }
+                "rules": {"cube": "tag:stability.struct"},
+            },
         }
 
     def process_text(self, text: str) -> SymbolicMetadata:
@@ -153,7 +153,7 @@ class SymbolPatternMatcher:
             matched_symbols=list(matches),
             dominant_topic=dominant_topic,
             symbolic_tags=symbolic_tags,
-            processing_confidence=avg_confidence
+            processing_confidence=avg_confidence,
         )
 
     @staticmethod
@@ -162,12 +162,12 @@ class SymbolPatternMatcher:
         return _to_dict(match)
 
     # ── Confidence model constants ─────────────────────────────────
-    EXACT_SCORE          = 1.0   # \bseed\b in text
-    SUBSTRING_SCORE      = 0.7   # seed contained as substring in text
-    STEM_SCORE           = 0.7   # seed and a text word share a strong prefix
-    SECONDARY_DECAY      = 0.9   # each match after the first contributes
-                                 # SECONDARY_DECAY ** i of its raw score
-    STEM_MIN_PREFIX      = 4     # minimum shared-prefix length to count
+    EXACT_SCORE = 1.0  # \bseed\b in text
+    SUBSTRING_SCORE = 0.7  # seed contained as substring in text
+    STEM_SCORE = 0.7  # seed and a text word share a strong prefix
+    SECONDARY_DECAY = 0.9  # each match after the first contributes
+    # SECONDARY_DECAY ** i of its raw score
+    STEM_MIN_PREFIX = 4  # minimum shared-prefix length to count
     STEM_MIN_PREFIX_RATIO = 0.5  # AND >= this fraction of seed length
 
     def _stem_match(self, seed_lower: str, text_lower: str) -> bool:
@@ -176,8 +176,9 @@ class SymbolPatternMatcher:
         ``initialize`` partially match a seed of ``initiate`` (shared
         prefix ``initia`` of length 6).
         """
-        threshold = max(self.STEM_MIN_PREFIX,
-                        int(len(seed_lower) * self.STEM_MIN_PREFIX_RATIO))
+        threshold = max(
+            self.STEM_MIN_PREFIX, int(len(seed_lower) * self.STEM_MIN_PREFIX_RATIO)
+        )
         for word in re.findall(r"[A-Za-z]+", text_lower):
             if word == seed_lower or seed_lower in word or word in seed_lower:
                 # Already covered by exact / substring tiers
@@ -191,7 +192,9 @@ class SymbolPatternMatcher:
                 return True
         return False
 
-    def _match_symbol(self, text: str, shape_name: str, shape_data: Dict[str, Any]) -> Optional[SymbolMatch]:
+    def _match_symbol(
+        self, text: str, shape_name: str, shape_data: Dict[str, Any]
+    ) -> Optional[SymbolMatch]:
         """Match a single symbol pattern against text.
 
         Tiered matching, highest-confidence wins per seed:
@@ -211,9 +214,9 @@ class SymbolPatternMatcher:
                               about the dominant topic)
         """
         text_lower = text.lower()
-        seeds = shape_data.get('seeds', [])
-        rules = shape_data.get('rules', {})
-        topic = shape_data.get('topic', 'unknown')
+        seeds = shape_data.get("seeds", [])
+        rules = shape_data.get("rules", {})
+        topic = shape_data.get("topic", "unknown")
 
         matched_seeds: List[str] = []
         applied_rules: Dict[str, str] = {}
@@ -224,7 +227,7 @@ class SymbolPatternMatcher:
             score: Optional[float] = None
 
             # Tier 1: exact word
-            if re.search(r'\b' + re.escape(seed_lower) + r'\b', text_lower):
+            if re.search(r"\b" + re.escape(seed_lower) + r"\b", text_lower):
                 score = self.EXACT_SCORE
             # Tier 2: substring
             elif seed_lower in text_lower:
@@ -248,8 +251,7 @@ class SymbolPatternMatcher:
         # match anchors the confidence; subsequent matches discount.
         sorted_scores = sorted(per_seed_scores, reverse=True)
         weighted_total = sum(
-            s * (self.SECONDARY_DECAY ** i)
-            for i, s in enumerate(sorted_scores)
+            s * (self.SECONDARY_DECAY**i) for i, s in enumerate(sorted_scores)
         )
         confidence = weighted_total / len(sorted_scores)
 

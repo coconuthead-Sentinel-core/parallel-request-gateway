@@ -33,6 +33,7 @@ PLATFORM_TIMEOUT: float = float(os.getenv("PLATFORM_TIMEOUT_SECONDS", "10.0"))
 
 # --- Platform client ---------------------------------------------------------
 
+
 class PlatformClient:
     """
     Async HTTP client for a single downstream platform.
@@ -128,6 +129,7 @@ class PlatformClient:
 
 
 # --- Convenience factories ---------------------------------------------------
+
 
 def get_qnf_client() -> PlatformClient:
     """Return a PlatformClient configured for Quantum Nexus Forge."""

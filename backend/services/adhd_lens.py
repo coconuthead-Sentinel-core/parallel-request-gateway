@@ -12,7 +12,7 @@ Architecture:
 
 import logging
 import re
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,16 @@ class ADHDLens:
     # Configuration
     CHUNK_SIZE_WORDS = 50
     BULLET_MARKERS = ["⚡", "💥", "🚀", "🔥", "⚡", "💫", "⭐", "🎯"]
-    ACTION_WORDS = ["start", "begin", "launch", "create", "build", "run", "execute", "activate"]
+    ACTION_WORDS = [
+        "start",
+        "begin",
+        "launch",
+        "create",
+        "build",
+        "run",
+        "execute",
+        "activate",
+    ]
 
     def __init__(self):
         """Initialize ADHD lens with default settings."""
@@ -64,7 +73,9 @@ class ADHDLens:
         # Join with ADHD-friendly formatting
         transformed = "\n\n".join(bullet_points)
 
-        logger.debug(f"🧠 ADHD lens transformed {len(sentences)} sentences into {len(chunks)} chunks")
+        logger.debug(
+            f"🧠 ADHD lens transformed {len(sentences)} sentences into {len(chunks)} chunks"
+        )
         return transformed
 
     def transform_response(self, response: str) -> str:
@@ -86,7 +97,7 @@ class ADHDLens:
     def _split_into_sentences(self, text: str) -> List[str]:
         """Split text into sentences."""
         # Simple sentence splitting (can be enhanced)
-        sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+        sentences = re.split(r"(?<=[.!?])\s+", text.strip())
         return [s.strip() for s in sentences if s.strip()]
 
     MAX_SENTENCES_PER_CHUNK = 5  # ADHD-friendly: never glob more than 5
@@ -105,10 +116,10 @@ class ADHDLens:
             sentence_words = len(sentence.split())
 
             # Flush if either word OR sentence cap would be exceeded.
-            word_overflow     = (current_word_count + sentence_words
-                                 > self.chunk_size) and current_chunk
-            sentence_overflow = (len(current_chunk)
-                                 >= self.MAX_SENTENCES_PER_CHUNK)
+            word_overflow = (
+                current_word_count + sentence_words > self.chunk_size
+            ) and current_chunk
+            sentence_overflow = len(current_chunk) >= self.MAX_SENTENCES_PER_CHUNK
             if word_overflow or sentence_overflow:
                 chunks.append(" ".join(current_chunk))
                 current_chunk = []
@@ -143,8 +154,10 @@ class ADHDLens:
 
         for word in self.ACTION_WORDS:
             # Add emphasis to action words (case-insensitive)
-            pattern = r'\b' + re.escape(word) + r'\b'
-            enhanced = re.sub(pattern, f"**{word.upper()}**", enhanced, flags=re.IGNORECASE)
+            pattern = r"\b" + re.escape(word) + r"\b"
+            enhanced = re.sub(
+                pattern, f"**{word.upper()}**", enhanced, flags=re.IGNORECASE
+            )
 
         return enhanced
 
@@ -157,12 +170,13 @@ class ADHDLens:
         """Get current lens configuration."""
         return {
             "chunk_size_words": self.chunk_size,
-            "bullet_markers":   list(self.BULLET_MARKERS),
-            "action_words":     list(self.ACTION_WORDS),
+            "bullet_markers": list(self.BULLET_MARKERS),
+            "action_words": list(self.ACTION_WORDS),
         }
 
 
 # --- Convenience Functions ---
+
 
 def create_adhd_lens() -> ADHDLens:
     """Create and return a configured ADHD lens instance."""

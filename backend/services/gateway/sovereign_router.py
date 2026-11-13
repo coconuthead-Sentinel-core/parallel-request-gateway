@@ -63,7 +63,9 @@ class SovereignRouter:
         Returns:
             Merged response dict from ResponseMerger.merge().
         """
-        logger.info("SovereignRouter.process — lens=%s | message length=%d", lens, len(message))
+        logger.info(
+            "SovereignRouter.process — lens=%s | message length=%d", lens, len(message)
+        )
 
         async with get_qnf_client() as qnf, get_sentinel_client() as sentinel:
             qnf_task = qnf.chat(message=message, lens=lens, context=context)

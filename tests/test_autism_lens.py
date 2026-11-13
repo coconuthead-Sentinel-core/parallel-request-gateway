@@ -7,14 +7,15 @@ Validates:
 4. Integration with CognitiveOrchestrator
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from backend.services.autism_lens import AutismLens
-from backend.domain.models import CognitiveLens
+import pytest
 
+from backend.domain.models import CognitiveLens
+from backend.services.autism_lens import AutismLens
 
 # --- Autism Lens Unit Tests ---
+
 
 class TestAutismLensInitialization:
     """Test Autism lens initialization."""
@@ -141,7 +142,7 @@ class TestAutismLensIntegration:
         Third, the data layer stores information.
         """
         result = lens.transform_context(text.strip())
-        
+
         # Should produce structured output
         assert len(result) > 0
         # Should mention key terms

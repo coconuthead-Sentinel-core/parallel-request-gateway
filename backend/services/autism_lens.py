@@ -12,7 +12,7 @@ Architecture:
 
 import logging
 import re
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ class AutismLens:
             return context
 
         # Split into paragraphs for processing
-        paragraphs = [p.strip() for p in context.split('\n\n') if p.strip()]
+        paragraphs = [p.strip() for p in context.split("\n\n") if p.strip()]
 
         transformed_paragraphs = []
         for para in paragraphs:
@@ -65,7 +65,7 @@ class AutismLens:
             transformed = self._emphasize_relationships(transformed)
             transformed_paragraphs.append(transformed)
 
-        result = '\n\n'.join(transformed_paragraphs)
+        result = "\n\n".join(transformed_paragraphs)
 
         # Add overall structure summary if multiple paragraphs
         if len(transformed_paragraphs) > 1:
@@ -75,7 +75,7 @@ class AutismLens:
 
     def _enhance_structure(self, text: str) -> str:
         """Enhance structural clarity in text."""
-        lines = text.split('\n')
+        lines = text.split("\n")
         enhanced_lines = []
 
         for line in lines:
@@ -85,61 +85,84 @@ class AutismLens:
                 continue
 
             # Check for existing structure
-            has_structure = any(re.match(pattern, line) for pattern in self.STRUCTURE_PATTERNS)
+            has_structure = any(
+                re.match(pattern, line) for pattern in self.STRUCTURE_PATTERNS
+            )
 
             if not has_structure and len(line) > 50:
                 # Add structural markers for long lines
-                if any(word in line.lower() for word in ['first', 'then', 'next', 'finally']):
+                if any(
+                    word in line.lower()
+                    for word in ["first", "then", "next", "finally"]
+                ):
                     line = f"🔗 {line}"
-                elif any(word in line.lower() for word in ['because', 'therefore', 'however']):
+                elif any(
+                    word in line.lower() for word in ["because", "therefore", "however"]
+                ):
                     line = f"📊 {line}"
                 else:
                     line = f"📝 {line}"
 
             enhanced_lines.append(line)
 
-        return '\n'.join(enhanced_lines)
+        return "\n".join(enhanced_lines)
 
     def _add_categorization(self, text: str) -> str:
         """Add explicit categorization labels."""
         # Identify potential categories
         categories = []
-        lines = text.split('\n')
+        lines = text.split("\n")
 
         for i, line in enumerate(lines):
             line_lower = line.lower()
-            if any(keyword in line_lower for keyword in ['definition', 'concept', 'category']):
+            if any(
+                keyword in line_lower
+                for keyword in ["definition", "concept", "category"]
+            ):
                 categories.append((i, "Definition"))
-            elif any(keyword in line_lower for keyword in ['example', 'instance', 'case']):
+            elif any(
+                keyword in line_lower for keyword in ["example", "instance", "case"]
+            ):
                 categories.append((i, "Example"))
-            elif any(keyword in line_lower for keyword in ['relationship', 'connection', 'link']):
+            elif any(
+                keyword in line_lower
+                for keyword in ["relationship", "connection", "link"]
+            ):
                 categories.append((i, "Relationship"))
-            elif any(keyword in line_lower for keyword in ['process', 'method', 'approach']):
+            elif any(
+                keyword in line_lower for keyword in ["process", "method", "approach"]
+            ):
                 categories.append((i, "Process"))
 
         # Add category markers
         for line_idx, category in categories:
-            marker = self.CATEGORY_MARKERS[self.category_index % len(self.CATEGORY_MARKERS)]
+            marker = self.CATEGORY_MARKERS[
+                self.category_index % len(self.CATEGORY_MARKERS)
+            ]
             lines[line_idx] = f"{marker} **{category}:** {lines[line_idx]}"
             self.category_index += 1
 
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def _emphasize_relationships(self, text: str) -> str:
         """Emphasize logical relationships and connections."""
         # Add relationship indicators
-        text = re.sub(r'\b(because|since|therefore|thus|hence|consequently)\b',
-                     r'→ \1', text, flags=re.IGNORECASE)
-        text = re.sub(r'\b(if|when|where|while)\b',
-                     r'↔ \1', text, flags=re.IGNORECASE)
-        text = re.sub(r'\b(contains|includes|has|part of)\b',
-                     r'⊂ \1', text, flags=re.IGNORECASE)
+        text = re.sub(
+            r"\b(because|since|therefore|thus|hence|consequently)\b",
+            r"→ \1",
+            text,
+            flags=re.IGNORECASE,
+        )
+        text = re.sub(r"\b(if|when|where|while)\b", r"↔ \1", text, flags=re.IGNORECASE)
+        text = re.sub(
+            r"\b(contains|includes|has|part of)\b", r"⊂ \1", text, flags=re.IGNORECASE
+        )
 
         return text
 
     def _add_structure_summary(self, text: str) -> str:
         """Add a summary of the overall structure."""
-        paragraphs = [p for p in text.split('\n\n') if p.strip()]
+        paragraphs = [p for p in text.split("\n\n") if p.strip()]
         summary = f"📋 **Structure Overview:** {len(paragraphs)} sections identified\n\n{text}"
         return summary
 
@@ -154,6 +177,7 @@ class AutismLens:
 
 
 # --- Convenience Functions ---
+
 
 def create_autism_lens() -> AutismLens:
     """Create and return a configured Autism lens instance."""
